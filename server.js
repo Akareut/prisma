@@ -13,20 +13,37 @@ const prisma = new PrismaClient()
 
 app.use(express.json())
 
-app.get("/quotes", (req,res)=>{
+app.get("/quotes",async (req,res)=>{
+    try{
+        const quotes = await prisma.quote.findMany({
+         include:{author:true}
+        }) 
+        res.status(200).json(quotes)
+     }
+
+     catch(error){
+        res.status(500).json({error:error.message})
     
+    }
     
 })
 
 app.post("/quotes",async (req,res)=>{
     try{
-       const quotes = await prisma.quote.findMany() 
-       res.status(200).json(quotes)
-    }
-catch(error){
-    res.status(500).json({error:error.message})
+        const {text,authorId} = req.body
+        const quote = await prisma.quote.create({
+            data:{text,authorId}
+        })
+        res.status(200).json(quote)
 
-}
+
+    }
+
+    catch{
+        res.status(500).json({error:error.message})   
+    }
+  
+
 })
 
 app.get("/quotes/:id", (req,res)=>{
